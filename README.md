@@ -1,4 +1,10 @@
+---
+project: https://v0.dev/chat/note-necromancy-readwise-to-yaml-to-v0-HoXiaZgaRco
+preview: https://v0-v0-note-necromancy-readwise.vercel.app/
+---
 # v0-note-necromancy-readwise
+<img width="1496" alt="Screenshot 2025-06-04 at 2 14 31 PM" src="https://github.com/user-attachments/assets/1586bdb7-a22c-4a47-885c-35096d6fc022" />
+<img width="1494" alt="Screenshot 2025-06-04 at 2 14 22 PM" src="https://github.com/user-attachments/assets/da9db38a-7431-44f0-84b1-5deec1449a8b" />
 
 *Automatically synced with your [v0.dev](https://v0.dev) deployments*
 
