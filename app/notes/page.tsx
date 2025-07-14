@@ -1,6 +1,27 @@
 import { allNotes } from "@/lib/mock-data"
 import { NoteCard } from "@/components/note-card"
 import { Badge } from "@/components/ui/badge"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Notes & Doctrine | FLOAT Learning Culture",
+  description:
+    "Explore notes on memory, ritual, and learning culture. Concepts that resonate as embodied heuristics and ritual practices.",
+  openGraph: {
+    title: "Notes & Doctrine | FLOAT Learning Culture",
+    description:
+      "Explore notes on memory, ritual, and learning culture. Concepts that resonate as embodied heuristics and ritual practices.",
+    url: "https://v0-v0-note-necromancy-readwise.vercel.app/notes",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Notes & Doctrine | FLOAT Learning Culture",
+    description:
+      "Explore notes on memory, ritual, and learning culture. Concepts that resonate as embodied heuristics and ritual practices.",
+    images: ["/og-image.png"],
+  },
+}
 
 export default function NoteIndex() {
   // Get all published notes

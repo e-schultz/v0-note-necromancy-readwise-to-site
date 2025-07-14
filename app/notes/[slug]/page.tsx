@@ -5,11 +5,52 @@ import { Badge } from "@/components/ui/badge"
 import { RitualCallout } from "@/components/ritual-callout"
 import { HighlightCard } from "@/components/highlight-card"
 import { SimpleMdx } from "@/components/simple-mdx"
+import type { Metadata } from "next"
 
 export async function generateStaticParams() {
   return allNotes.map((note) => ({
     slug: note.slug,
   }))
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const note = allNotes.find((note) => note.slug === params.slug)
+
+  if (!note) {
+    return {
+      title: "Note Not Found",
+    }
+  }
+
+  const description = note.body.raw.substring(0, 160) + (note.body.raw.length > 160 ? "..." : "")
+
+  return {
+    title: `${note.title} | FLOAT Learning Culture`,
+    description,
+    openGraph: {
+      title: note.title,
+      description,
+      url: `https://v0-v0-note-necromancy-readwise.vercel.app/notes/${note.slug}`,
+      siteName: "FLOAT Learning Culture",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: `${note.title} - FLOAT Learning Culture`,
+        },
+      ],
+      type: "article",
+      publishedTime: note.date,
+      tags: note.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: note.title,
+      description,
+      images: ["/og-image.png"],
+    },
+  }
 }
 
 export default function NotePage({ params }: { params: { slug: string } }) {

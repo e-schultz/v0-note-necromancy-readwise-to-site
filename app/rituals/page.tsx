@@ -1,5 +1,26 @@
 import { allRituals } from "@/lib/mock-data"
 import { RitualCard } from "@/components/ritual-card"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Rituals | FLOAT Learning Culture",
+  description:
+    "Structured practices to cultivate learning, memory, and cognitive flow. Micro-rituals and externalization practices for neurodivergent thinking.",
+  openGraph: {
+    title: "Rituals | FLOAT Learning Culture",
+    description:
+      "Structured practices to cultivate learning, memory, and cognitive flow. Micro-rituals and externalization practices for neurodivergent thinking.",
+    url: "https://v0-v0-note-necromancy-readwise.vercel.app/rituals",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rituals | FLOAT Learning Culture",
+    description:
+      "Structured practices to cultivate learning, memory, and cognitive flow. Micro-rituals and externalization practices for neurodivergent thinking.",
+    images: ["/og-image.png"],
+  },
+}
 
 export default function RitualsOverview() {
   const rituals = allRituals.sort((a, b) => a.title.localeCompare(b.title))

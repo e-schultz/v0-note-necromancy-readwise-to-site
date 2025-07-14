@@ -1,6 +1,27 @@
 import { allHighlights } from "@/lib/mock-data"
 import { HighlightCard } from "@/components/highlight-card"
 import { Badge } from "@/components/ui/badge"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Highlights | FLOAT Learning Culture",
+  description:
+    "Curated highlights and excerpts on learning, ritual, and note-necromancy. Insights from recursive thinkers and neurodivergent perspectives.",
+  openGraph: {
+    title: "Highlights | FLOAT Learning Culture",
+    description:
+      "Curated highlights and excerpts on learning, ritual, and note-necromancy. Insights from recursive thinkers and neurodivergent perspectives.",
+    url: "https://v0-v0-note-necromancy-readwise.vercel.app/highlights",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Highlights | FLOAT Learning Culture",
+    description:
+      "Curated highlights and excerpts on learning, ritual, and note-necromancy. Insights from recursive thinkers and neurodivergent perspectives.",
+    images: ["/og-image.png"],
+  },
+}
 
 export default function HighlightsFeed() {
   const highlights = allHighlights.sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime())
