@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Terminal, ChevronRight } from "lucide-react"
 import { allNotes, allRituals, allHighlights } from "@/lib/mock-data"
@@ -14,19 +13,34 @@ interface Command {
   execute: (args: string[]) => string | void
 }
 
+interface Completion {
+  value: string
+  description?: string
+  type: "command" | "slug" | "tag" | "argument"
+}
+
 export function TerminalCommandLine() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [output, setOutput] = useState<string[]>([
-    "░▒▓█ FLOAT::TERMINAL v2.0.25 █▓▒░",
+    "░▒▓█ FLOAT::TERMINAL v2.1.0 █▓▒░",
     "Type 'help' for available commands",
     "Press Ctrl+` to toggle terminal",
+    "Use Tab for completions",
     "",
   ])
+
+  // Completion state
+  const [completions, setCompletions] = useState<Completion[]>([])
+  const [selectedCompletion, setSelectedCompletion] = useState(0)
+  const [showCompletions, setShowCompletions] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState(0)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
+  const completionRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   const commands: Command[] = [
@@ -54,9 +68,16 @@ export function TerminalCommandLine() {
           "  whoami            - Show current context",
           "  status            - System status",
           "",
+          "Completion:",
+          "  Tab               - Complete current input",
+          "  Tab Tab           - Show all completions",
+          "  ↑/↓               - Navigate completions",
+          "  Enter             - Apply completion",
+          "  Esc               - Hide completions",
+          "",
           "Examples:",
-          "  > open better-tshirt-rule",
-          "  > find ritual",
+          "  > open better-<Tab>",
+          "  > find ritual<Tab>",
           "  > n | grep float",
           "",
         ]
@@ -231,10 +252,11 @@ export function TerminalCommandLine() {
           "",
           "User: cognitive_archaeologist",
           "Mode: note_necromancy",
-          "System: FLOAT v2.0.25",
+          "System: FLOAT v2.1.0",
           "Location: /sanctuary/terminal",
           "Permissions: read, write, ritual",
           "Status: consciousness_recovering",
+          "Completions: enabled",
           "",
         ].join("\n")
       },
@@ -251,6 +273,7 @@ export function TerminalCommandLine() {
           `Highlights: ${allHighlights.length} cached`,
           "Memory: ritual_patterns.db",
           "Processing: slow_mode_enabled",
+          "Completions: fuzzy_match_enabled",
           "Glitch_level: minimal",
           "Consciousness: recovering",
           "",
@@ -267,6 +290,167 @@ export function TerminalCommandLine() {
       },
     },
   ]
+
+  // Fuzzy matching function
+  const fuzzyMatch = (pattern: string, text: string): boolean => {
+    const patternLower = pattern.toLowerCase()
+    const textLower = text.toLowerCase()
+
+    if (textLower.includes(patternLower)) return true
+
+    let patternIndex = 0
+    for (let i = 0; i < textLower.length && patternIndex < patternLower.length; i++) {
+      if (textLower[i] === patternLower[patternIndex]) {
+        patternIndex++
+      }
+    }
+    return patternIndex === patternLower.length
+  }
+
+  // Generate completions based on current input
+  const generateCompletions = useCallback((inputValue: string, cursorPos: number): Completion[] => {
+    const beforeCursor = inputValue.slice(0, cursorPos)
+    const parts = beforeCursor.split(" ")
+    const currentWord = parts[parts.length - 1] || ""
+
+    const completions: Completion[] = []
+
+    if (parts.length === 1) {
+      // Complete command names
+      commands.forEach((cmd) => {
+        if (fuzzyMatch(currentWord, cmd.name)) {
+          completions.push({
+            value: cmd.name,
+            description: cmd.description,
+            type: "command",
+          })
+        }
+        // Check aliases
+        cmd.aliases?.forEach((alias) => {
+          if (fuzzyMatch(currentWord, alias)) {
+            completions.push({
+              value: alias,
+              description: `${cmd.description} (alias)`,
+              type: "command",
+            })
+          }
+        })
+      })
+    } else {
+      // Complete arguments based on command
+      const commandName = parts[0].toLowerCase()
+      const command = commands.find((cmd) => cmd.name === commandName || cmd.aliases?.includes(commandName))
+
+      if (command?.name === "open") {
+        // Complete note and ritual slugs
+        allNotes.forEach((note) => {
+          if (fuzzyMatch(currentWord, note.slug)) {
+            completions.push({
+              value: note.slug,
+              description: `note: ${note.title}`,
+              type: "slug",
+            })
+          }
+        })
+
+        allRituals.forEach((ritual) => {
+          if (fuzzyMatch(currentWord, ritual.slug)) {
+            completions.push({
+              value: ritual.slug,
+              description: `ritual: ${ritual.title}`,
+              type: "slug",
+            })
+          }
+        })
+      } else if (command?.name === "find") {
+        // Complete with common search terms from content
+        const searchTerms = new Set<string>()
+
+        // Extract common words from titles and tags
+        allNotes.forEach((note) => {
+          note.title
+            .toLowerCase()
+            .split(/\s+/)
+            .forEach((word) => {
+              if (word.length > 3) searchTerms.add(word)
+            })
+          note.tags?.forEach((tag) => searchTerms.add(tag))
+        })
+
+        allRituals.forEach((ritual) => {
+          ritual.title
+            .toLowerCase()
+            .split(/\s+/)
+            .forEach((word) => {
+              if (word.length > 3) searchTerms.add(word)
+            })
+          ritual.tags?.forEach((tag) => searchTerms.add(tag))
+        })
+
+        Array.from(searchTerms).forEach((term) => {
+          if (fuzzyMatch(currentWord, term)) {
+            completions.push({
+              value: term,
+              description: `search term`,
+              type: "argument",
+            })
+          }
+        })
+      }
+    }
+
+    // Sort by relevance (exact matches first, then by length)
+    return completions
+      .sort((a, b) => {
+        const aExact = a.value.toLowerCase().startsWith(currentWord.toLowerCase())
+        const bExact = b.value.toLowerCase().startsWith(currentWord.toLowerCase())
+
+        if (aExact && !bExact) return -1
+        if (!aExact && bExact) return 1
+
+        return a.value.length - b.value.length
+      })
+      .slice(0, 10) // Limit to 10 completions
+  }, [])
+
+  // Update completions when input changes
+  useEffect(() => {
+    if (input.trim() && isOpen) {
+      const newCompletions = generateCompletions(input, cursorPosition)
+      setCompletions(newCompletions)
+      setShowCompletions(newCompletions.length > 0)
+      setSelectedCompletion(0)
+    } else {
+      setShowCompletions(false)
+      setCompletions([])
+    }
+  }, [input, cursorPosition, isOpen])
+
+  // Apply completion
+  const applyCompletion = (completion: Completion) => {
+    const beforeCursor = input.slice(0, cursorPosition)
+    const afterCursor = input.slice(cursorPosition)
+    const parts = beforeCursor.split(" ")
+
+    // Replace the current word with the completion
+    parts[parts.length - 1] = completion.value
+    const newInput = parts.join(" ") + afterCursor
+
+    setInput(newInput)
+    setShowCompletions(false)
+
+    // Set cursor position after the completed word
+    const newCursorPos = parts.join(" ").length
+    setCursorPosition(newCursorPos)
+
+    // Focus input and set cursor position
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus()
+        inputRef.current.setSelectionRange(newCursorPos, newCursorPos)
+      }
+    }, 0)
+  }
 
   // Toggle terminal with Ctrl+`
   useEffect(() => {
@@ -294,6 +478,16 @@ export function TerminalCommandLine() {
       outputRef.current.scrollTop = outputRef.current.scrollHeight
     }
   }, [output])
+
+  // Update cursor position
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value)
+    setCursorPosition(e.target.selectionStart || 0)
+  }
+
+  const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    setCursorPosition((e.target as HTMLInputElement).selectionStart || 0)
+  }
 
   const executeCommand = (commandLine: string) => {
     const trimmed = commandLine.trim()
@@ -324,19 +518,52 @@ export function TerminalCommandLine() {
     }
 
     setInput("")
+    setShowCompletions(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showCompletions && completions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault()
+        setSelectedCompletion((prev) => (prev + 1) % completions.length)
+        return
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault()
+        setSelectedCompletion((prev) => (prev - 1 + completions.length) % completions.length)
+        return
+      } else if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault()
+        applyCompletion(completions[selectedCompletion])
+        return
+      } else if (e.key === "Escape") {
+        e.preventDefault()
+        setShowCompletions(false)
+        return
+      }
+    }
+
     if (e.key === "Enter") {
       executeCommand(input)
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key === "Tab") {
+      e.preventDefault()
+      if (input.trim()) {
+        const newCompletions = generateCompletions(input, cursorPosition)
+        if (newCompletions.length === 1) {
+          applyCompletion(newCompletions[0])
+        } else if (newCompletions.length > 1) {
+          setCompletions(newCompletions)
+          setShowCompletions(true)
+          setSelectedCompletion(0)
+        }
+      }
+    } else if (e.key === "ArrowUp" && !showCompletions) {
       e.preventDefault()
       if (history.length > 0) {
         const newIndex = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1)
         setHistoryIndex(newIndex)
         setInput(history[newIndex])
       }
-    } else if (e.key === "ArrowDown") {
+    } else if (e.key === "ArrowDown" && !showCompletions) {
       e.preventDefault()
       if (historyIndex !== -1) {
         const newIndex = historyIndex + 1
@@ -372,11 +599,14 @@ export function TerminalCommandLine() {
         <div className="flex items-center justify-between p-2 border-b border-purple-500/30 bg-purple-500/10">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-purple-400" />
-            <span className="text-xs font-mono text-purple-400">FLOAT::TERMINAL</span>
+            <span className="text-xs font-mono text-purple-400">FLOAT::TERMINAL v2.1.0</span>
           </div>
-          <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-red-400 text-xs font-mono">
-            [X]
-          </button>
+          <div className="flex items-center gap-2">
+            {showCompletions && <span className="text-xs font-mono text-cyan-400">[{completions.length}]</span>}
+            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-red-400 text-xs font-mono">
+              [X]
+            </button>
+          </div>
         </div>
 
         {/* Terminal Output */}
@@ -389,19 +619,72 @@ export function TerminalCommandLine() {
         </div>
 
         {/* Terminal Input */}
-        <div className="flex items-center p-3 border-t border-purple-500/30 bg-black/50">
+        <div className="relative flex items-center p-3 border-t border-purple-500/30 bg-black/50">
           <ChevronRight className="w-4 h-4 text-cyan-400 mr-2" />
           <input
             ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
+            onClick={handleInputClick}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent text-cyan-400 font-mono text-sm outline-none placeholder-gray-500"
-            placeholder="Enter command..."
+            placeholder="Enter command... (Tab for completions)"
             autoComplete="off"
           />
-          <div className="text-xs text-gray-500 font-mono ml-2">Ctrl+` to toggle</div>
+          <div className="text-xs text-gray-500 font-mono ml-2 flex items-center gap-1">
+            {showCompletions && <span className="text-cyan-400">↑↓</span>}
+            <kbd className="px-1 bg-gray-800 border border-gray-600 rounded">Ctrl+`</kbd>
+          </div>
+
+          {/* Completions positioned above input */}
+          {showCompletions && completions.length > 0 && (
+            <div className="absolute bottom-full left-0 right-0 mb-1 z-10">
+              <div className="bg-black/95 border border-purple-500/50 backdrop-blur-sm max-h-40 overflow-y-auto">
+                <div className="text-xs text-purple-400 font-mono px-2 py-1 bg-purple-500/10 border-b border-purple-500/30">
+                  ▓ {completions.length} matches
+                </div>
+                <div className="grid grid-cols-1 gap-0">
+                  {completions.slice(0, 8).map((completion, index) => (
+                    <div
+                      key={`${completion.type}-${completion.value}`}
+                      className={`px-2 py-1 text-xs font-mono cursor-pointer flex items-center justify-between ${
+                        index === selectedCompletion
+                          ? "bg-cyan-500/30 text-cyan-300"
+                          : "text-gray-300 hover:bg-gray-800/30"
+                      }`}
+                      onClick={() => applyCompletion(completion)}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className={`font-bold ${
+                            completion.type === "command"
+                              ? "text-green-400"
+                              : completion.type === "slug"
+                                ? "text-purple-400"
+                                : completion.type === "tag"
+                                  ? "text-yellow-400"
+                                  : "text-cyan-400"
+                          }`}
+                        >
+                          {completion.value}
+                        </span>
+                        {index === selectedCompletion && <span className="text-cyan-400">←</span>}
+                      </div>
+                      {completion.description && (
+                        <span className="text-gray-500 text-xs truncate ml-2 max-w-xs">{completion.description}</span>
+                      )}
+                    </div>
+                  ))}
+                  {completions.length > 8 && (
+                    <div className="px-2 py-1 text-xs text-gray-500 font-mono border-t border-gray-700">
+                      ... and {completions.length - 8} more (keep typing to filter)
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
