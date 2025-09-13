@@ -54,7 +54,7 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Float theme colors
+        // Float theme colors - using modern Tailwind color names
         purple: {
           50: "#f5f3ff",
           100: "#ede9fe",
@@ -81,6 +81,20 @@ const config = {
           900: "#164e63",
           950: "#083344",
         },
+        // Using slate instead of deprecated blueGray
+        slate: {
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+          950: "#020617",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -98,10 +112,40 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        // Terminal-specific animations
+        glitch: {
+          "0%": { transform: "translate(0)" },
+          "20%": { transform: "translate(-2px, 2px)" },
+          "40%": { transform: "translate(-2px, -2px)" },
+          "60%": { transform: "translate(2px, 2px)" },
+          "80%": { transform: "translate(2px, -2px)" },
+          "100%": { transform: "translate(0)" },
+        },
+        scanline: {
+          "0%": { transform: "translateY(-100vh)" },
+          "100%": { transform: "translateY(100vh)" },
+        },
+        flicker: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
+        },
+        "cursor-blink": {
+          "0%, 50%": { opacity: "1" },
+          "51%, 100%": { opacity: "0" },
+        },
+        "matrix-rain": {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100vh)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        glitch: "glitch 0.3s infinite",
+        scanline: "scanline 3s linear infinite",
+        flicker: "flicker 2s infinite",
+        "cursor-blink": "cursor-blink 1s infinite",
+        "matrix-rain": "matrix-rain 3s linear infinite",
       },
       typography: {
         DEFAULT: {
@@ -219,7 +263,27 @@ const config = {
               fontWeight: "700",
               color: "inherit",
             },
-            // ...
+          },
+        },
+        // Dark mode prose styles for terminal theme
+        invert: {
+          css: {
+            "--tw-prose-body": "rgb(229 231 235)",
+            "--tw-prose-headings": "rgb(243 244 246)",
+            "--tw-prose-lead": "rgb(156 163 175)",
+            "--tw-prose-links": "rgb(34 211 238)",
+            "--tw-prose-bold": "rgb(243 244 246)",
+            "--tw-prose-counters": "rgb(156 163 175)",
+            "--tw-prose-bullets": "rgb(75 85 99)",
+            "--tw-prose-hr": "rgb(55 65 81)",
+            "--tw-prose-quotes": "rgb(167 139 250)",
+            "--tw-prose-quote-borders": "rgb(139 92 246)",
+            "--tw-prose-captions": "rgb(156 163 175)",
+            "--tw-prose-code": "rgb(110 231 183)",
+            "--tw-prose-pre-code": "rgb(229 231 235)",
+            "--tw-prose-pre-bg": "rgb(17 24 39)",
+            "--tw-prose-th-borders": "rgb(75 85 99)",
+            "--tw-prose-td-borders": "rgb(55 65 81)",
           },
         },
       },

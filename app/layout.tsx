@@ -4,6 +4,7 @@ import { JetBrains_Mono } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar } from "@/components/navbar"
 import { GlitchOverlay } from "@/components/glitch-overlay"
+import { TerminalCommandLine } from "@/components/terminal-command-line"
 import { cn } from "@/lib/utils"
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
@@ -61,6 +62,7 @@ export default function RootLayout({
           <GlitchOverlay />
           <Navbar />
           <main className="relative z-10">{children}</main>
+          <TerminalCommandLine />
         </ThemeProvider>
       </body>
     </html>
