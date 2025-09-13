@@ -4,64 +4,64 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 95%;
 
     --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 10%;
+    --muted-foreground: 215.4 16.3% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 15%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 214.3 31.8% 20%;
+    --input: 214.3 31.8% 15%;
     --ring: 262.1 83.3% 57.8%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 95%;
 
     --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 40% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 40% 10%;
+    --muted-foreground: 215.4 16.3% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 210 40% 15%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 214.3 31.8% 20%;
+    --input: 214.3 31.8% 15%;
     --ring: 262.1 83.3% 57.8%;
   }
 }
@@ -71,19 +71,125 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
   }
 }
 
-/* Float-specific styles */
-.glass-card {
-  @apply bg-white/75 dark:bg-gray-900/75 backdrop-blur-md rounded-2xl shadow-lg border-0;
+/* Glitch and terminal effects */
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
 }
 
-.float-gradient {
-  @apply bg-gradient-to-r from-purple-600 to-cyan-500;
+@keyframes scanline {
+  0% {
+    transform: translateY(-100vh);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
 }
 
-.float-text {
-  @apply bg-gradient-to-r from-purple-600 to-cyan-500 bg-clip-text text-transparent;
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.glitch-text {
+  animation: glitch 0.3s infinite;
+}
+
+.scanline {
+  animation: scanline 3s linear infinite;
+}
+
+.terminal-flicker {
+  animation: flicker 2s infinite;
+}
+
+.ascii-border {
+  border-image: linear-gradient(45deg, #8b5cf6, #06b6d4, #10b981) 1;
+}
+
+/* Terminal cursor */
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor::after {
+  content: "█";
+  animation: cursor-blink 1s infinite;
+  color: #10b981;
+}
+
+/* Glitch overlay */
+.glitch-overlay {
+  background: linear-gradient(90deg, transparent 98%, rgba(139, 92, 246, 0.1) 100%),
+    linear-gradient(0deg, transparent 98%, rgba(6, 182, 212, 0.1) 100%);
+  background-size: 3px 3px, 3px 3px;
+}
+
+/* Matrix-style text effects */
+.matrix-text {
+  text-shadow: 0 0 5px currentColor;
+}
+
+/* Terminal window styling */
+.terminal-window {
+  background: radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%), #000000;
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #8b5cf6, #06b6d4) 1;
+}
+
+/* Floating elements */
+.float-element {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2), inset 0 0 20px rgba(6, 182, 212, 0.1);
+}
+
+/* Neon glow effects */
+.neon-purple {
+  color: #a78bfa;
+  text-shadow: 0 0 5px #8b5cf6, 0 0 10px #8b5cf6, 0 0 15px #8b5cf6;
+}
+
+.neon-cyan {
+  color: #67e8f9;
+  text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4, 0 0 15px #06b6d4;
+}
+
+.neon-green {
+  color: #6ee7b7;
+  text-shadow: 0 0 5px #10b981, 0 0 10px #10b981, 0 0 15px #10b981;
 }

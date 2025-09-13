@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge"
+import { Activity } from "lucide-react"
 
 interface RitualCalloutProps {
   ritual: {
@@ -9,20 +9,23 @@ interface RitualCalloutProps {
 
 export function RitualCallout({ ritual }: RitualCalloutProps) {
   return (
-    <div className="bg-purple-50/80 dark:bg-purple-900/20 border-l-4 border-purple-400 dark:border-purple-600 px-4 py-3 rounded-xl shadow-md my-4">
-      <div className="flex items-center mb-2">
-        <Badge className="bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 hover:bg-purple-300 dark:hover:bg-purple-700">
-          Ritual
-        </Badge>
-        <span className="ml-2 font-medium">{ritual.title}</span>
+    <div className="border-2 border-yellow-500 bg-yellow-500/10 p-4 my-6">
+      <div className="flex items-center gap-3 mb-3">
+        <Activity className="w-5 h-5 text-yellow-400" />
+        <span className="text-xs text-gray-500 font-mono">ritual::</span>
+        <span className="font-mono font-bold text-yellow-400">{ritual.title}</span>
       </div>
-      <ul className="list-disc ml-6 space-y-1">
+
+      <div className="text-xs text-gray-500 font-mono mb-2">▓▓ PROTOCOL ▓▓</div>
+
+      <ol className="list-none space-y-2">
         {ritual.steps.map((step, i) => (
-          <li key={i} className="text-sm text-gray-700 dark:text-gray-300">
-            {step}
+          <li key={i} className="text-sm font-mono text-gray-300 flex items-start">
+            <span className="text-yellow-400 mr-3 font-bold">{String(i + 1).padStart(2, "0")}:</span>
+            <span>{step}</span>
           </li>
         ))}
-      </ul>
+      </ol>
     </div>
   )
 }

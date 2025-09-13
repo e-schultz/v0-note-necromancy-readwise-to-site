@@ -3,106 +3,97 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { MoonIcon, SunIcon, MenuIcon, XIcon } from "lucide-react"
+import { Terminal, Cpu, Activity, Zap, MenuIcon, XIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 
 export function Navbar() {
-  const { theme, setTheme } = useTheme()
   const pathname = usePathname()
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [glitchText, setGlitchText] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
+    const interval = setInterval(() => {
+      setGlitchText((prev) => !prev)
+    }, 5000)
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => clearInterval(interval)
   }, [])
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/notes", label: "Notes" },
-    { href: "/rituals", label: "Rituals" },
-    { href: "/highlights", label: "Highlights" },
+    { href: "/", label: "HOME", icon: Terminal },
+    { href: "/notes", label: "NOTES", icon: Cpu },
+    { href: "/rituals", label: "RITUALS", icon: Activity },
+    { href: "/highlights", label: "HIGHLIGHTS", icon: Zap },
   ]
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-md" : "bg-transparent",
-      )}
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 border-b-2 border-purple-500 bg-black/90 backdrop-blur-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="font-bold text-xl">
-            <span className="bg-gradient-to-r from-purple-600 to-cyan-500 bg-clip-text text-transparent">FLOAT</span>
+            <span className={cn("neon-purple font-mono", glitchText && "glitch-text")}>░▒▓ FLOAT ▓▒░</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-purple-600 dark:hover:text-cyan-400",
-                  pathname === link.href ? "text-purple-600 dark:text-cyan-400" : "text-gray-700 dark:text-gray-300",
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav className="hidden md:flex items-center space-x-8">
+            {navLinks.map((link) => {
+              const Icon = link.icon
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-sm font-mono transition-all hover:neon-cyan flex items-center gap-2",
+                    pathname === link.href
+                      ? "neon-green border-b border-green-400"
+                      : "text-gray-400 hover:text-cyan-400",
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  {link.label}
+                </Link>
+              )
+            })}
           </nav>
 
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-            </Button>
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
-            </Button>
-          </div>
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden text-purple-400 hover:text-cyan-400"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
+          </Button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-purple-500/30 bg-black/95 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors px-2 py-1 rounded-md",
-                    pathname === link.href
-                      ? "bg-purple-100 dark:bg-gray-800 text-purple-600 dark:text-cyan-400"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const Icon = link.icon
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "text-sm font-mono transition-all px-2 py-1 rounded flex items-center gap-2",
+                      pathname === link.href
+                        ? "neon-green bg-green-500/10"
+                        : "text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10",
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.label}
+                  </Link>
+                )
+              })}
             </nav>
           </div>
         </div>
